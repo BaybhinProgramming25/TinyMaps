@@ -47,17 +47,10 @@ const Home = () => {
               your email and password. Already have an account? Just click "Login" to access all 
               your saved routes and locations.
             </p>
-            <p>
-              Your account keeps track of your favorite routes, saved locations, and search history, 
-              making it even easier to plan your trips. Whether you're planning a road trip, figuring 
-              out the distance between two cities, or just exploring different places around the world, 
-              our coordinate-based route finder gives you precise, reliable directions every time.
-            </p>
             <ul>
-              <li>Save your favorite routes for quick access</li>
-              <li>View your search history</li>
-              <li>Get personalized route recommendations</li>
-              <li>Access your maps from any device</li>
+              <li>Convert geographic locations to map tile coordinates (x, y, zoom level)</li>
+              <li>Search for any city and automatically get its geographic boundaries</li>
+              <li>Find routes between two geographic points</li>
             </ul>
           </div>
 
