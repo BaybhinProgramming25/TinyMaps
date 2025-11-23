@@ -22,11 +22,10 @@ const EmailSent = () => {
           <section className="sent-section">
             <h2>What to Do Next</h2>
             <ul>
-              <li>Open your email inbox and look for our verification message</li>
+              <li>Open your email inbox via Mailhog and look for our verification message</li>
               <li>Click the verification link in the email</li>
               <li>You'll be redirected back to Maps with your account activated</li>
               <li>Start exploring all the features we have to offer</li>
-              <li>Save this page - you can request a new link if needed</li>
             </ul>
           </section>
 
@@ -37,16 +36,6 @@ const EmailSent = () => {
               junk folder. Sometimes verification emails end up there by mistake. 
               Make sure to mark it as "not spam" so you can receive future updates 
               from us without any issues.
-            </p>
-          </section>
-
-          <section className="sent-section">
-            <h2>Need a New Link?</h2>
-            <p>
-              If the verification link expires or you need us to resend the email, 
-              don't worry! Just click the "Resend Verification Email" button below, 
-              and we'll send you a fresh link. The link is valid for 24 hours from 
-              the time it was sent.
             </p>
           </section>
         </div>

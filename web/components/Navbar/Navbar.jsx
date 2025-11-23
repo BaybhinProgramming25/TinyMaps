@@ -24,7 +24,7 @@ const Navbar = () => {
     return (
         <div>
             <header className='top-grid'>
-                <h1 className='tg-header'>Maps</h1>
+                <h1 className='tg-header'>Tiny Maps</h1>
                 <div className='tg-contact'>+1 (800) MAPS </div>
             </header>
             <header className='bottom-grid'>

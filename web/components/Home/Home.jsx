@@ -5,7 +5,7 @@ const Home = () => {
     <div className="home-container">
       <div className="home-box">
         <section className="hero-section">
-          <h1>Welcome to the Maps Application!</h1>
+          <h1>Welcome to Tiny Maps!</h1>
           <p className="hero-text">
             Navigate the world with precision and ease. Our Maps application makes it simple 
             to find routes between any two locations on Earth using longitude and latitude coordinates.
@@ -21,14 +21,12 @@ const Home = () => {
             <p>
               Our Maps application makes it easy for you to find the perfect route between any 
               two places on Earth! To get started, you'll need to know the longitude and latitude 
-              coordinates of both your starting point and your destination. Don't worry if that 
-              sounds complicated - it's actually pretty simple!
+              coordinates of both your starting point and your destination.
             </p>
             <p>
               Longitude and latitude are like a special address system for the entire planet. 
               Latitude tells you how far north or south you are from the equator, while longitude 
-              tells you how far east or west you are. Together, these two numbers can pinpoint 
-              any location on Earth with incredible accuracy!
+              tells you how far east or west you are.
             </p>
             <p>
               Once you've entered both sets of coordinates, our smart mapping system will calculate 
