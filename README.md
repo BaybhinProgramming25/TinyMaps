@@ -6,6 +6,7 @@ This project was able to handle a load of __76000 concurrent requests per second
 
 # Technology Requirements
 
+- Docker Desktop
 - Docker & Docker-Compose
 - Kubernetes via minikube
 - K6 Load Testing
