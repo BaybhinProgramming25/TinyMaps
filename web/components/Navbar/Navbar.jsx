@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
@@ -6,44 +7,67 @@ import axios from 'axios'
 import './Navbar.css'
 
 const Navbar = () => {
-
+    
     const { user, logout } = useAuth();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const logout_wrapper = async () => {
-
         try {
             await axios.post('http://localhost:8000/api/logout', user, { withCredentials: true });
             logout();
+            setIsMenuOpen(false); // Close menu after logout
         }
         catch (error) {
             console.error('Error logging out', error);
         }
     }
-        
 
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    }
+
+    const closeMenu = () => {
+        setIsMenuOpen(false);
+    }
+        
     return (
         <div>
             <header className='top-grid'>
-                <h1 className='tg-header'>Tiny Maps</h1>
-                <div className='tg-contact'>+1 (800) MAPS </div>
+                <h1 className='tg-header'>TQA</h1>
+                <div className='tg-contact'>+1 (800) TQA </div>
             </header>
             <header className='bottom-grid'>
                 <nav className='middle-tabs'>
-                    <div className='hamburger-content'>
+                    <button 
+                        className={`hamburger-button ${isMenuOpen ? 'open' : ''}`}
+                        onClick={toggleMenu}
+                        aria-label="Toggle menu"
+                    >
+                        {isMenuOpen ? (
+                            <span className="close-icon">✕</span>
+                        ) : (
+                            <>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </>
+                        )}
+                    </button>
+
+                    <div className={`hamburger-content ${isMenuOpen ? 'show' : ''}`}>
                         {(user) && (
                             <>
-                                <Link to="/dashboard">Dashboard</Link>
-                                <Link to="/contact">Contact Us</Link>
+                                <Link to="/dashboard" onClick={closeMenu}>Dashboard</Link>
+                                <Link to="/contact" onClick={closeMenu}>Contact Us</Link>
                                 <Link to="/login" onClick={logout_wrapper}>Logout</Link>
                             </>
                         )}
-
                         {(!user) && (
                             <>
-                                <Link to="/">Home</Link>
-                                <Link to="/contact">Contact Us</Link>
-                                <Link to="/login">Login</Link>
-                                <Link to="/signup">Sign Up</Link>
+                                <Link to="/" onClick={closeMenu}>Home</Link>
+                                <Link to="/contact" onClick={closeMenu}>Contact Us</Link>
+                                <Link to="/login" onClick={closeMenu}>Login</Link>
+                                <Link to="/signup" onClick={closeMenu}>Sign Up</Link>
                             </>
                         )}
                     </div>
@@ -52,5 +76,4 @@ const Navbar = () => {
         </div>
     )
 }
-
-export default Navbar; 
+export default Navbar;
