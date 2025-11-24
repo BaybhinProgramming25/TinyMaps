@@ -5,7 +5,6 @@ import Home from '../components/Home/Home.jsx'
 import Login from '../components/Login/Login.jsx'
 import SignUp from '../components/SignUp/SignUp.jsx'
 import ContactUs from '../components/ContactUs/ContactUs.jsx'
-import About from '../components/About/About.jsx'
 import Footer from '../components/Footer/Footer.jsx'
 import EmailSent from '../components/VerifyEmailSent/VerifyEmailSent.jsx'
 
@@ -31,6 +30,11 @@ const App = () => {
                 <Home />
               </PublicRoute>
             } />
+            <Route path="/contact" element={
+              <PublicRoute>
+                <ContactUs />
+              </PublicRoute>
+            } />
             <Route path="/login" element={
               <PublicRoute>
                 <Login />
@@ -46,9 +50,6 @@ const App = () => {
                 <EmailSent />
               </PublicRoute>
             } />
-
-            <Route path='/about' element={<About />}></Route>
-            <Route path='/contact' element={<ContactUs />}></Route>
 
             {/** Protected Route */}
             <Route 
