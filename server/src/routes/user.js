@@ -49,14 +49,13 @@ router.post('/api/login', async (req, res) => {
   try {
 
     const { email, password } = req.body;
+    const user = await User.findOne({ email: email })
 
     const passwordCheck = bcrypt.compare(password, user.password);
 
     if (!passwordCheck) {
       return res.status(400).json({ error: 'Invalid Credentials'})
     }
-
-    const user = await User.findOne({ email: email})
 
     if (!user) {
       console.log("ERROR - Invalid credentials")
@@ -99,7 +98,6 @@ router.post('/api/login', async (req, res) => {
     res.status(200).json({ user_data: user_email_pair, accessToken: accessToken });
 
   } catch (error) {
-
     console.error('Error logging in:', error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
@@ -122,10 +120,7 @@ router.get('/api/verify/:token', async (req, res) => {
     user.verificationToken = null; // Set to null, knowing that we verified 
     await user.save();
 
-    // Comment this out until we get the frontend pods to start running 
-    // res.redirect(`http://localhost:5173/login`)
-
-    return res.status(200).json({ message: 'successfully verified!'});
+    res.redirect(`http://localhost:5173/login`)
 
   } catch (error) {
     console.error('Error verifying email:', error);
