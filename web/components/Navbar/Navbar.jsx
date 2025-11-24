@@ -33,7 +33,6 @@ const Navbar = () => {
                         {(user) && (
                             <>
                                 <Link to="/dashboard">Dashboard</Link>
-                                <Link to="/about">About</Link>
                                 <Link to="/contact">Contact Us</Link>
                                 <Link to="/login" onClick={logout_wrapper}>Logout</Link>
                             </>
@@ -42,7 +41,6 @@ const Navbar = () => {
                         {(!user) && (
                             <>
                                 <Link to="/">Home</Link>
-                                <Link to="/about">About</Link>
                                 <Link to="/contact">Contact Us</Link>
                                 <Link to="/login">Login</Link>
                                 <Link to="/signup">Sign Up</Link>
