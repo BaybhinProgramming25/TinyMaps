@@ -3,7 +3,8 @@ import axios from 'axios'
 
 import './ConvertComponent.css'
 
-function ConvertForm() {
+const ConvertForm = () => {
+  
   const [zoom, setZoom] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
@@ -33,21 +34,12 @@ function ConvertForm() {
     }
   };
 
+
   return (
-    <div style={{
-      width: '852px',
-      position: 'absolute',
-      top: '700px',
-      right: '40px',
-      zIndex: 1000,           // Puts it above the map
-      backgroundColor: 'white',
-      padding: '15px',
-      borderRadius: '8px',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
-    }}>
-      <header>Convert Form</header>
-      <form id="convert" onSubmit={handleSubmit}>
+    <div className='convert-container'>
+      <form id="convert" className='convert-form' onSubmit={handleSubmit}>
         <input
+          className='convert-input'
           type="number"
           name="Zoom"
           value={zoom}
@@ -55,6 +47,7 @@ function ConvertForm() {
           placeholder="Zoom"
         />
         <input
+          className='convert-input'
           type="number"
           step="any"
           name="Latitude"
@@ -63,6 +56,7 @@ function ConvertForm() {
           placeholder="Latitude"
         />
         <input
+          className='convert-input'
           type="number"
           step="any"
           name="Longitude"
@@ -70,8 +64,8 @@ function ConvertForm() {
           onChange={(e) => setLongitude(e.target.value)}
           placeholder="Longitude"
         />
-        <button type="submit">Convert</button>
-    </form>
+        <button className='convert-button' type="submit">Convert</button>
+      </form>
     </div>
   );
 }
