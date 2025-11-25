@@ -7,7 +7,7 @@ import axios from 'axios'
 import './Navbar.css'
 
 const Navbar = () => {
-    
+
     const { user, logout } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -15,7 +15,7 @@ const Navbar = () => {
         try {
             await axios.post('http://localhost:8000/api/logout', user, { withCredentials: true });
             logout();
-            setIsMenuOpen(false); // Close menu after logout
+            setIsMenuOpen(false);
         }
         catch (error) {
             console.error('Error logging out', error);
@@ -33,8 +33,8 @@ const Navbar = () => {
     return (
         <div>
             <header className='top-grid'>
-                <h1 className='tg-header'>TQA</h1>
-                <div className='tg-contact'>+1 (800) TQA </div>
+                <h1 className='tg-header'>Tiny Maps</h1>
+                <div className='tg-contact'>+1 (800) Tiny Maps</div>
             </header>
             <header className='bottom-grid'>
                 <nav className='middle-tabs'>
@@ -58,7 +58,6 @@ const Navbar = () => {
                         {(user) && (
                             <>
                                 <Link to="/dashboard" onClick={closeMenu}>Dashboard</Link>
-                                <Link to="/contact" onClick={closeMenu}>Contact Us</Link>
                                 <Link to="/login" onClick={logout_wrapper}>Logout</Link>
                             </>
                         )}
