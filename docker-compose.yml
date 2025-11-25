@@ -7,7 +7,6 @@ services:
       - osm-data:/data/database
     profiles:
       - db_load 
-
   frontend:
     image: maps-frontend 
     build:
