@@ -7,7 +7,7 @@
   grid-template-columns: repeat(12, 1fr);
   gap: 30px;
   align-items: flex-start;
-  background-color: #A44EB5;
+  background-color: #3d2b28;
   min-height: 5vh;
 }
 
