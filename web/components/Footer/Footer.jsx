@@ -5,13 +5,12 @@ const Footer = () => {
   return (
     <footer className="footer">
       <div className="footer-top">
-        <h2 className="footer-logo">Maps</h2>
+        <h2 className="footer-logo">Tiny Maps</h2>
         <div className="footer-contact">+1 (800) MAPS</div>
       </div>
       <div className="footer-bottom">
         <nav className="footer-nav">
           <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
           <Link to="/contact">Contact Us</Link>
           <Link to="/login">Login</Link>
           <Link to="/signup">Sign Up</Link>
