@@ -64,9 +64,11 @@ http://localhost:5173/
 
 ![System Architecture Diagram](images/architecture.png)
 
-# Endpoint Testing
+# Endpoint Testing (No Cache)
 
 ![Convert Load Test Results (without Cache)](images/no-cache.png)
+
+# Endpoint Testing (With Cache)
 
 ![Convert Load Test Results (with Cache)](images/cache.png)
 
