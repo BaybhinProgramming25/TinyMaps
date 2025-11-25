@@ -6,19 +6,15 @@ const { redisClient } = require('../configs/redis.config')
 
 router.post('/api/route', async (req, res) => {
 
-  // No Cache test first
-
   const { source, destination } = req.body;
   const url = `https://router.project-osrm.org/route/v1/driving/${source.lon},${source.lat};${destination.lon},${destination.lat}?steps=true`;
 
-  /*
-  // Check if data is in cache 
   const route_response = await redisClient.get(`route:${source.lon},${source.lat},${destination.lon},${destination.lat}`);
+  
   if (route_response) {
     const data = JSON.parse(route_response);
     return res.status(200).json({ formattedRoute: data});
   }
-    */
 
   try {
 
@@ -36,9 +32,7 @@ router.post('/api/route', async (req, res) => {
       distance: step.distance
     }));
 
-    // Store data in redis 
-    // await redisClient.setEx(`route:${source.lon},${source.lat},${destination.lon},${destination.lat}`, 3600, JSON.stringify(formattedRoute));
-
+    await redisClient.setEx(`route:${source.lon},${source.lat},${destination.lon},${destination.lat}`, 3600, JSON.stringify(formattedRoute));
     return res.status(200).json({ formattedRoute: formattedRoute});
   }
   catch (error) {
@@ -46,6 +40,5 @@ router.post('/api/route', async (req, res) => {
     res.status(500).json({ error: 'Issue with getting the route'});
   }
 });
-
 
 module.exports = router;

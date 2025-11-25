@@ -10,7 +10,6 @@ const upload = multer();
 
 router.post('/api/convert', async (req, res) => {
 
-
     const { lat, long, zoom } = req.body;
 
     try {
@@ -39,166 +38,186 @@ router.post('/api/convert', async (req, res) => {
             y_tile: y_tile
         }
 
-        await redisClient.set(`convert:${lat},${long},${zoom}`, 3600, JSON.stringify(data));
+        try {
+            await redisClient.set(`convert:${lat},${long},${zoom}`, 3600, JSON.stringify(data));
+        }
+        catch (error) {
+            console.error('Error putting convert data into redis: ', error)
+            return res.status(500).json({ error: 'Internal Redis Error', message: error.message});
+        }
 
-        return res.status(200).json({
-            x_tile: x_tile,
-            y_tile: y_tile
-        });
+        return res.status(200).json({ x_tile: x_tile, y_tile: y_tile });
     }
     catch (error) {
-        console.error('ERROR in /api/convert:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Error getting convert data from redis', error);
+        return res.status(500).json({ error: "Internal Redis Error", message: error.message });
     }
 });
 
 
 router.post('/api/search', upload.none(), async (req, res) => {
 
-  const { bbox, onlyInBox, searchTerm } = req.body;
+    const { bbox, onlyInBox, searchTerm } = req.body;
+    const modifiedSearchTerm = searchTerm.trim();
 
-  const search_response = await redisClient.get(`search:${searchTerm},${onlyInBox}`);
-  if (search_response) {
-    const data = JSON.parse(search_response);
-    return res.status(200).json({ formattedResults: data })
-  }
+    try {
 
-  let housenumber = null;
-  let street = null;
-  let city = null;
+        const search_response = await redisClient.get(`search:${modifiedSearchTerm},${onlyInBox}`);
 
-  const location = searchTerm.split(',');
-
-  let parts = location[0].split(' ');
-  if (/\d/.test(parts[0])) {
-      housenumber = parts.shift();
-      street = parts.join(' ');
-  } else {
-      housenumber = null;
-      street = location[0].trim();
-  }
-
-  if (location[1]) {
-      city = location[1].trim();
-  } else {
-      city = street;  // Fallback 
-  }
-
-  const searchConditions = [];
-  if (searchTerm) {
-      searchConditions.push(`name ILIKE '%${searchTerm}%'`);
-  }
-  if (housenumber) {
-      searchConditions.push(`"addr:housenumber" ILIKE '%${housenumber}%'`);
-  }
-  if (street) {
-      searchConditions.push(`tags->'addr:street' ILIKE '%${street}%'`);
-  }
-  if (city) {
-      searchConditions.push(`tags->'addr:city' ILIKE '%${city}%'`);
-  }
-
-  const searchQuery = searchConditions.join(' OR ');
-
-  try {
-      let query = `
-      SELECT name,
-      ST_X(ST_Centroid(ST_Transform(way, 4326))) AS lon,
-      ST_Y(ST_Centroid(ST_Transform(way, 4326))) AS lat,
-      ST_XMin(ST_Extent(ST_Transform(way, 4326))) AS minLon,
-      ST_YMin(ST_Extent(ST_Transform(way, 4326))) AS minLat,
-      ST_XMax(ST_Extent(ST_Transform(way, 4326))) AS maxLon,
-      ST_YMax(ST_Extent(ST_Transform(way, 4326))) AS maxLat
-      FROM planet_osm_point
-      WHERE `;
-
-      if (onlyInBox == true) {
-
-          query += `ST_Intersects(ST_MakeEnvelope(${bbox.minLon}, ${bbox.minLat}, ${bbox.maxLon}, ${bbox.maxLat}, 4326), way) AND (${searchQuery}) `;
-          query += `GROUP BY
-          name,
-          lon,
-          lat
-          LIMIT 30;`
-      }
-      else {
-          query += `${searchQuery} `;
-          query += `GROUP BY
-          name,
-          lon,
-          lat
-          LIMIT 30;`
-      }
-
-      const { rows }  = await pool.query(query);
- 
-      let formattedResults = rows
-        .filter(row => row.name !== null) 
-        .map(row => ({
-          name: row.name,
-          coordinates: { lat: row.lat, lon: row.lon },
-          bbox: {
-              minLat: row.minlat,
-              minLon: row.minlon,
-              maxLat: row.maxlat,
-              maxLon: row.maxlon
-          }
-      }));
-
-      if (rows.length < 30) {
-          query = `
-          SELECT name,
-          ST_X(ST_Centroid(ST_Transform(way, 4326))) AS lon,
-          ST_Y(ST_Centroid(ST_Transform(way, 4326))) AS lat,
-          ST_XMin(ST_Extent(ST_Transform(way, 4326))) AS minLon,
-          ST_YMin(ST_Extent(ST_Transform(way, 4326))) AS minLat,
-          ST_XMax(ST_Extent(ST_Transform(way, 4326))) AS maxLon,
-          ST_YMax(ST_Extent(ST_Transform(way, 4326))) AS maxLat
-          FROM planet_osm_line
-          WHERE `;
-
-          if (onlyInBox == true) {
-              query += `ST_Intersects(ST_MakeEnvelope(${bbox.minLon}, ${bbox.minLat}, ${bbox.maxLon}, ${bbox.maxLat}, 4326), way) AND (${searchQuery}) `;
-              query += `GROUP BY
-              name,
-              lon,
-              lat
-              LIMIT 30;`
-          }
-          else {
-              query += `${searchQuery} `;
-              query += `GROUP BY
-              name,
-              lon,
-              lat
-              LIMIT 30;`
-          }
-
-          const { rows }  = await pool.query(query);
-   
-          formattedResults = formattedResults.concat(rows
-            .filter(row => row.name !== null) 
-            .map(row => ({
-              name: row.name,
-              coordinates: { lat: row.lat, lon: row.lon },
-              bbox: {
-                  minLat: row.minlat,
-                  minLon: row.minlon,
-                  maxLat: row.maxlat,
-                  maxLon: row.maxlon
-                }
-              }))
-              .filter(result => result.name !== null)
-          );
+        if (search_response) {
+            const data = JSON.parse(search_response);
+            return res.status(200).json({ formattedResults: data })
         }
 
-        await redisClient.setEx(`search:${searchTerm},${onlyInBox}`, 3600, JSON.parse(formattedResults));
-        return res.status(200).json({ formattedResults: formattedResults});
-  }
-  catch (error) {
-      console.error('Error searching:', error);
-      res.status(200).json({ status: 'ERROR', message: 'Failed to process search query' });
-  }
+        let housenumber = null;
+        let street = null;
+        let city = null;
+
+        const location = modifiedSearchTerm.split(',');
+
+        let parts = location[0].split(' ');
+        if (/\d/.test(parts[0])) {
+            housenumber = parts.shift();
+            street = parts.join(' ');
+        } else {
+            housenumber = null;
+            street = location[0].trim();
+        }
+
+        if (location[1]) {
+            city = location[1].trim();
+        } else {
+            city = street;  // Fallback 
+        }
+
+        const searchConditions = [];
+        if (modifiedSearchTerm) {
+            searchConditions.push(`name ILIKE '%${modifiedSearchTerm}%'`);
+        }
+        if (housenumber) {
+            searchConditions.push(`"addr:housenumber" ILIKE '%${housenumber}%'`);
+        }
+        if (street) {
+            searchConditions.push(`tags->'addr:street' ILIKE '%${street}%'`);
+        }
+        if (city) {
+            searchConditions.push(`tags->'addr:city' ILIKE '%${city}%'`);
+        }
+
+        const searchQuery = searchConditions.join(' OR ');
+
+        try {
+
+            let query = `
+            SELECT name,
+            ST_X(ST_Centroid(ST_Transform(way, 4326))) AS lon,
+            ST_Y(ST_Centroid(ST_Transform(way, 4326))) AS lat,
+            ST_XMin(ST_Extent(ST_Transform(way, 4326))) AS minLon,
+            ST_YMin(ST_Extent(ST_Transform(way, 4326))) AS minLat,
+            ST_XMax(ST_Extent(ST_Transform(way, 4326))) AS maxLon,
+            ST_YMax(ST_Extent(ST_Transform(way, 4326))) AS maxLat
+            FROM planet_osm_point
+            WHERE `;
+
+            if (onlyInBox == true) {
+
+                query += `ST_Intersects(ST_MakeEnvelope(${bbox.minLon}, ${bbox.minLat}, ${bbox.maxLon}, ${bbox.maxLat}, 4326), way) AND (${searchQuery}) `;
+                query += `GROUP BY
+                name,
+                lon,
+                lat
+                LIMIT 30;`
+            }
+            else {
+                query += `${searchQuery} `;
+                query += `GROUP BY
+                name,
+                lon,
+                lat
+                LIMIT 30;`
+            }
+
+            const { rows }  = await pool.query(query);
+        
+            let formattedResults = rows
+                .filter(row => row.name !== null) 
+                .map(row => ({
+                name: row.name,
+                coordinates: { lat: row.lat, lon: row.lon },
+                bbox: {
+                    minLat: row.minlat,
+                    minLon: row.minlon,
+                    maxLat: row.maxlat,
+                    maxLon: row.maxlon
+                }
+            }));
+
+            if (rows.length < 30) {
+                query = `
+                SELECT name,
+                ST_X(ST_Centroid(ST_Transform(way, 4326))) AS lon,
+                ST_Y(ST_Centroid(ST_Transform(way, 4326))) AS lat,
+                ST_XMin(ST_Extent(ST_Transform(way, 4326))) AS minLon,
+                ST_YMin(ST_Extent(ST_Transform(way, 4326))) AS minLat,
+                ST_XMax(ST_Extent(ST_Transform(way, 4326))) AS maxLon,
+                ST_YMax(ST_Extent(ST_Transform(way, 4326))) AS maxLat
+                FROM planet_osm_line
+                WHERE `;
+
+                if (onlyInBox == true) {
+                    query += `ST_Intersects(ST_MakeEnvelope(${bbox.minLon}, ${bbox.minLat}, ${bbox.maxLon}, ${bbox.maxLat}, 4326), way) AND (${searchQuery}) `;
+                    query += `GROUP BY
+                    name,
+                    lon,
+                    lat
+                    LIMIT 30;`
+                }
+                else {
+                    query += `${searchQuery} `;
+                    query += `GROUP BY
+                    name,
+                    lon,
+                    lat
+                    LIMIT 30;`
+                }
+
+                const { rows }  = await pool.query(query);
+        
+                formattedResults = formattedResults.concat(rows
+                    .filter(row => row.name !== null) 
+                    .map(row => ({
+                    name: row.name,
+                    coordinates: { lat: row.lat, lon: row.lon },
+                    bbox: {
+                        minLat: row.minlat,
+                        minLon: row.minlon,
+                        maxLat: row.maxlat,
+                        maxLon: row.maxlon
+                        }
+                    }))
+                    .filter(result => result.name !== null)
+                );
+            }
+
+            try {
+                await redisClient.setEx(`search:${modifiedSearchTerm},${onlyInBox}`, 3600, JSON.stringify(formattedResults))
+            }
+            catch (error) {
+                console.error('Error adding search data into redis', error);
+                return res.status(500).json({ error: 'Internal Redis Error', message: error.message});
+            }
+
+            return res.status(200).json({ formattedResults: formattedResults });
+        } 
+        catch (error) {
+            console.error(`Error performing search`, error);
+            return res.status(500).json({ error: 'Internal Server Error', message: error.message});
+        }
+    }
+    catch (error) {
+        console.error(`Error getting search data from redis`, error);
+        return res.status(500).json({ error: 'Internal Redis Error', message: error.message});
+    }
 });
 
 module.exports = router;
