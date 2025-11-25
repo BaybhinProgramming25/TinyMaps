@@ -2,13 +2,12 @@
 
 Tiny Maps is a small replica of existing maps applications with an emphasis on application load intensity. 
 
-This project was able to handle a load of __76000 concurrent requests per second (rps), with 99.95% of the requests responding under 30 ms.__
+This project was able to handle a load of __over 100,000+ requests per second (rps), with 99.95% of the requests responding under 30 ms fkr the convert endpoint.__
 
 # Technology Requirements
 
 - Docker Desktop
 - Docker & Docker-Compose
-- Kubernetes via minikube
 - K6 Load Testing
 - Make 
 
@@ -28,6 +27,13 @@ https://download.geofabrik.de/
 
 ```
 docker-compose --profile db_load up
+```
+
+Note: This part will take some time, as it is uploading the .osm.pbf file into a PostgreSQL database.
+In addition, please be sure to take a look at the __docker-compose.yml__ file and replace the placeholder path 
+__with the absolute path__ to your .osm.pbf file.   
+
+```
 docker-compose up -d 
 ```
 
@@ -41,6 +47,11 @@ http://localhost:5173/
 
 ```
 make load-db
+```
+
+You can also run it through this way. Be mindful of the same set of instructions for this command above. 
+
+```
 make dir 
 ```
 
@@ -53,4 +64,14 @@ http://localhost:5173/
 # Architecture
 
 ![System Architecture Diagram](images/architecture.png)
+
+# Endpoint Testing
+
+![Convert Load Test Results (without Cache)](images/no-cache.png)
+
+![Convert Load Test Results (with Cache)](images/cache.png)
+
+
+
+
 
