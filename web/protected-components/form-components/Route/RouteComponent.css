@@ -1,10 +1,38 @@
-.route-component {
-    position: absolute;
-    top: '10px';
-    right: '40px';
-    z-index: 1000;
-    background-color: white;
-    padding: '15px';
-    border-radius: '8px';
-    box-shadow: '0 2px 6px rgba(0,0,0,0.3)';
+.route-container {
+  width: 852px;
+  position: absolute;
+  top: 10px;
+  right: 40px;
+  z-index: 1000;
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.route-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.route-input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.route-button {
+  padding: 10px;
+  background-color: purple;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.route-button:hover {
+  background-color: purple;
 }

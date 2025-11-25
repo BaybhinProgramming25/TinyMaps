@@ -4,6 +4,8 @@ import L from 'leaflet';
 
 import axios from 'axios'
 
+import './RouteComponent.css'
+
 const RouteForm = () => {
 
   const map = useMap();
@@ -12,17 +14,24 @@ const RouteForm = () => {
   const [slon, setSlon] = useState('');
   const [dlat, setDlat] = useState('');
   const [dlon, setDlon] = useState('');
-  const [markers, setMarkers] = useState([]);
 
- 
+  const [markers, setMarkers] = useState([]);
+  const [mapLines, setMapLines] = useState([]);
+
+
   const handleSubmit = async (e) => {
 
     e.preventDefault();
 
-    // Remove markers on each submit 
+    // Remove markers and polylines on each submit  
     markers.forEach(marker => {
       map.removeLayer(marker);
     })
+
+    mapLines.forEach(mapLine => {
+      map.removeLayer(mapLine);
+    })
+
 
     const source = {
       lat: parseFloat(slat),
@@ -43,7 +52,6 @@ const RouteForm = () => {
       if (!response.status) throw new Error('Network response was not ok');
       
       const results = response.data.formattedRoute;
-      console.log(response);
 
       // Get descriptions and coordinates
       const descriptions = results.map(item => item.description);
@@ -66,16 +74,44 @@ const RouteForm = () => {
         }
       }
 
-      const markers_storage = []
+      const markers_storage = [];
+      const lines_storage = [];
+      let prev_coord_holder = null;
 
       markersOnly.forEach((coord, index) => {
-        const marker = L.marker([coord.lat, coord.lon]).addTo(map);
+
+        const isSource = index === 0;
+        const isDestination = index === markersOnly.length - 1;
+
+        const marker = L.circleMarker([coord.lat, coord.lon], {
+            radius: 10,
+            fillColor: isSource ? 'green' : isDestination ? 'red' : 'blue',
+            color: 'white',
+            weight: 2,
+            fillOpacity: 0.9
+        }).addTo(map);
         marker.bindPopup(modDescriptions[index]);
+
+        if (prev_coord_holder) {
+          var line = L.polyline([
+            [prev_coord_holder.prev_lat, prev_coord_holder.prev_lon],
+            [coord.lat, coord.lon]
+          ], {
+            color: 'blue',
+            weight: 3,
+            opacity: 0.7
+          }).addTo(map);
+          lines_storage.push(line);
+        }
+        prev_coord_holder = {
+          prev_lat: coord.lat,
+          prev_lon: coord.lon
+        }
         markers_storage.push(marker);
       });
 
       setMarkers(markers_storage);
-
+      setMapLines(lines_storage);
 
     } catch (error) {
       console.error('Problem with fetch', error);
@@ -83,19 +119,10 @@ const RouteForm = () => {
   };
 
   return (
-     <div style={{
-      position: 'absolute',
-      top: '10px',
-      right: '40px',
-      zIndex: 1000,           // Puts it above the map
-      backgroundColor: 'white',
-      padding: '15px',
-      borderRadius: '8px',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
-    }}>
-      <header>Route Form</header>
-      <form id="route" onSubmit={handleSubmit}>
+    <div className='route-container'>
+      <form id="route" className='route-form'onSubmit={handleSubmit}>
         <input
+          className='route-input'
           type="number"
           step="any"
           name="slat"
@@ -104,6 +131,7 @@ const RouteForm = () => {
           placeholder="Start Latitude"
         />
         <input
+          className='route-input'
           type="number"
           step="any"
           name="slon"
@@ -112,6 +140,7 @@ const RouteForm = () => {
           placeholder="Start Longitude"
         />
         <input
+          className='route-input'
           type="number"
           step="any"
           name="dlat"
@@ -120,6 +149,7 @@ const RouteForm = () => {
           placeholder="Destination Latitude"
         />
         <input
+          className='route-input'
           type="number"
           step="any"
           name="dlon"
@@ -127,8 +157,8 @@ const RouteForm = () => {
           onChange={(e) => setDlon(e.target.value)}
           placeholder="Destination Longitude"
         />
-        <button type="submit">Route</button>
-      </form>
+        <button className='route-button' type="submit">Route</button>
+    </form>
     </div>
   );
 }
