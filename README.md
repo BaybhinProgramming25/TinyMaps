@@ -8,7 +8,6 @@ This project was able to handle a load of __over 100,000+ requests per second (r
 
 - Docker Desktop
 - Docker & Docker-Compose
-- K6 Load Testing
 - Make 
 
 # Disclaimers:
