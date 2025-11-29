@@ -24,7 +24,6 @@ const App = () => {
         <Navbar />
           <Routes>
 
-            {/** Public Routes */}
             <Route path="/" element={
               <PublicRoute>
                 <Home />
@@ -51,7 +50,6 @@ const App = () => {
               </PublicRoute>
             } />
 
-            {/** Protected Route */}
             <Route 
               path="/dashboard"
               element={
