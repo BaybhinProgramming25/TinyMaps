@@ -48,7 +48,11 @@ router.post('/api/login', async (req, res) => {
 
   try {
 
+  
     const { email, password } = req.body;
+
+    console.log(email, password);
+
     const user = await User.findOne({ email: email })
 
     const passwordCheck = bcrypt.compare(password, user.password);
@@ -227,7 +231,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
       }
     });
 
-    const verificationLink = `http://backend-service:8000/api/verify/${verificationToken}`;
+    const verificationLink = `http://localhost:8000/api/verify/${verificationToken}`;
 
     const mailOptions = {
       from: 'no-reply@mapviewer.com', 
