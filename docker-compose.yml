@@ -1,0 +1,89 @@
+services:
+
+  frontend:
+    image: tinymaps-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - tinymaps
+
+  backend:
+    image: tinymaps-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - tinymaps
+
+  postgres:
+    image: postgres:latest
+    container_name: tinymaps_postgres
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "max_connections=100"
+      - "-c"
+      - "work_mem=16MB"
+      - "-c"
+      - "maintenance_work_mem=128MB"
+    ports:
+      - "5431:5432"
+    env_file:
+      - backend/.env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    networks:
+      - tinymaps
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - tinymaps
+
+  tileserver:
+    image: overv/openstreetmap-tile-server
+    command: run
+    ports:
+      - "8080:80"
+    volumes:
+      - osm-data:/data/database
+    networks:
+      - tinymaps
+
+  osm-import:
+    image: overv/openstreetmap-tile-server
+    command: import
+    volumes:
+      - ./data/region.osm.pbf:/data/region.osm.pbf
+      - osm-data:/data/database
+    profiles:
+      - import
+    networks:
+      - tinymaps
+
+volumes:
+  postgres-data:
+  redis-data:
+  osm-data:
+networks:
+  tinymaps:

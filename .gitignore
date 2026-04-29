@@ -1,3 +1,14 @@
+# Env files
+.env
+**/.env
+
+# Ignore data folder (user will have to make it themselves)
+data/
+
+# Dependencies
+node_modules/
+**/node_modules/
+
 # Ignore the northeast data
 map-data/
 
