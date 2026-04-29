@@ -1,7 +1,0 @@
-* {
-  margin: 0;
-}
-
-body:has(.dashboard-grid) footer {
-  display: none;
-}
