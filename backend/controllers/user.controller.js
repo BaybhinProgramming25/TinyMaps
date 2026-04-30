@@ -21,12 +21,40 @@ export const signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await pool.query(
-      'INSERT INTO users (username, email, password) VALUES ($1, $2, $3)',
+    const newUser = await pool.query(
+      'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email',
       [username, email, hashedPassword]
     );
 
-    res.status(201).json({ message: 'Account created successfully' });
+    const user = newUser.rows[0];
+
+    const accessToken = jwt.sign(
+      { id: user.id, username: user.username },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    const refreshToken = jwt.sign(
+      { id: user.id, username: user.username },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    await pool.query(
+      'UPDATE users SET refresh_token = $1 WHERE id = $2',
+      [refreshToken, user.id]
+    );
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(201).json({
+      accessToken,
+      user: { id: user.id, username: user.username, email: user.email },
+    });
 
   } catch (error) {
     console.error('Signup error:', error);
