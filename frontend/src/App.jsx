@@ -7,13 +7,13 @@ import Signup from './components/Signup/Signup.jsx';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading) return <div className='loading'>Loading...</div>;
   return user ? children : <Navigate to='/login' />;
 };
 
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading) return <div className='loading'>Loading...</div>;
   return user ? <Navigate to='/dashboard' /> : children;
 };
 

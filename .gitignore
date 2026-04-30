@@ -5,6 +5,9 @@
 # Ignore data folder (user will have to make it themselves)
 data/
 
+# Ignore the copy for now 
+frontend copy/ 
+
 # Dependencies
 node_modules/
 **/node_modules/
