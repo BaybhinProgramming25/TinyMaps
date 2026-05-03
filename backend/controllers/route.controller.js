@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { redisClient } from '../configs/redis.config.js';
 
-const OSRM_BASE_URL = 'https://router.project-osrm.org/route/v1';
+const ORS_BASE_URL = 'https://api.openrouteservice.org/v2/directions';
 
 const PROFILES = {
-  walk: 'foot',
-  bike: 'bike',
+  walk: 'foot-walking',
+  bike: 'cycling-regular',
 };
 
 export const getRoute = async (req, res) => {
@@ -22,29 +22,46 @@ export const getRoute = async (req, res) => {
     const cached = await redisClient.get(cacheKey);
 
     if (cached) {
-      return res.status(200).json({ formattedRoute: JSON.parse(cached), fromCache: true });
+      return res.status(200).json({ ...JSON.parse(cached), fromCache: true });
     }
 
-    const url = `${OSRM_BASE_URL}/${profile}/${source.lon},${source.lat};${destination.lon},${destination.lat}?steps=true`;
-    const response = await axios.get(url);
-
-    const steps = response.data.routes[0].legs.flatMap(leg => leg.steps);
-
-    const formattedRoute = steps.map(step => ({
-      description: step.name,
-      coordinates: {
-        lat: step.intersections[0].location[1],
-        lon: step.intersections[0].location[0],
+    const response = await axios.post(
+      `${ORS_BASE_URL}/${profile}/geojson`,
+      {
+        coordinates: [[source.lon, source.lat], [destination.lon, destination.lat]],
+        radiuses: [-1, -1],
+        preference: 'fastest',
+        options: { avoid_features: ['ferries'] },
       },
-      distance: step.distance,
-    }));
+      {
+        headers: {
+          Authorization: process.env.ORS_API_KEY,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-    await redisClient.setEx(cacheKey, 3600, JSON.stringify(formattedRoute));
+    const feature = response.data.features[0];
+    const geometry = feature.geometry.coordinates.map(([lon, lat]) => ({ lat, lon }));
+    const { distance, duration } = feature.properties.summary;
 
-    res.status(200).json({ formattedRoute });
+    const steps = feature.properties.segments
+      .flatMap(seg => seg.steps)
+      .map(step => ({
+        instruction: step.instruction,
+        distance: step.distance,
+        wayPoints: step.way_points,
+      }));
+
+    const result = { geometry, steps, totalDistance: distance, totalDuration: duration };
+
+    await redisClient.setEx(cacheKey, 3600, JSON.stringify(result));
+
+    res.status(200).json(result);
 
   } catch (error) {
-    console.error('Routing error:', error.message);
-    res.status(500).json({ message: 'Failed to get route' });
+    const orsMessage = error.response?.data?.error?.message;
+    console.error('Routing error:', orsMessage || error.message);
+    res.status(500).json({ message: orsMessage || 'Failed to get route' });
   }
 };
